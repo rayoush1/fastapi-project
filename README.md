@@ -37,3 +37,7 @@ Listę endpointów można zobaczyć na
 http://127.0.0.1:8000/docs
 lub
 http://127.0.0.1:8000/redoc
+
+## Testy
+
+Plik requests.http zawiera przykładowe testy w REST Client dla Visual studio code.

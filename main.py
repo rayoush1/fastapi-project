@@ -6,7 +6,7 @@
 from http.client import responses
 import sqlite3
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 import requests
 
 from typing import Any
@@ -53,7 +53,18 @@ def geoc(lat: float, lon: float):
 # Część labu od punktu 5 (obsługa bazy danych)
 #######################################################################
 
-# Funkcja łączy się z bazą danych dbase i zwraca cursor
+# Funkcja łączy się z bazą danych dbase, zwraca cursor i zamyka połączenie
+def handle_connection():
+    db = sqlite3.connect('movies-extended.db')
+    try:
+        yield db
+        db.commit()
+    except:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
 def init_connection(dbase: str):
     db = sqlite3.connect(dbase)
     cursor = db.cursor()
@@ -67,9 +78,9 @@ def init_connection(dbase: str):
 # Pobiera informacje o filmach z bazy movies-extended.db; zwraca wynik 
 # w formie listy słowników
 @app.get('/movies')
-def get_movies():
+def get_movies(db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         movies = cursor.execute('SELECT * FROM movie').fetchall()
         output = []
         for movie in movies:
@@ -81,9 +92,9 @@ def get_movies():
 
 # Pobiera informacje o filmie z id = {movie_id} z tabeli movie
 @app.get('/movies/{movie_id}')
-def get_single_movie(movie_id:int):
+def get_single_movie(movie_id:int, db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         movie = cursor.execute(f"SELECT * FROM movie WHERE id={movie_id}").fetchone()
         if movie is None:
             return {"message": "Nie znaleziono filmu"}
@@ -93,9 +104,9 @@ def get_single_movie(movie_id:int):
     
 # Dodaje film do tabeli movie
 @app.post("/movies")
-def add_movie(params: dict[str, Any]):
+def add_movie(params: dict[str, Any], db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('INSERT INTO movie (title, director, year, description) VALUES (?, ?, ?, ?)', (params["title"], params["director"], params["year"], params["description"]))
         db.commit()
         if cursor.rowcount > 0:
@@ -107,11 +118,11 @@ def add_movie(params: dict[str, Any]):
 
 # Usuwa wszystkie filmy z tabeli movie
 @app.delete("/movies")
-async def rem_movies_all():
+def rem_movies_all(db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('DELETE FROM movie;')
-        db.commit()
+        #db.commit()
 
         if cursor.rowcount > 0:
             return {"message": f"Wszystkie filmy zostały usunięte!"}
@@ -123,11 +134,11 @@ async def rem_movies_all():
 
 # Aktualizuje dane filmu o id = {id} z tabeli movie
 @app.put("/movies/{id}")
-def update_movie_id(id: int, params: dict[str, Any]):
+def update_movie_id(id: int, params: dict[str, Any], db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('UPDATE movie SET title = ?, director = ?, year = ?, description = ? WHERE id = ?;', (params["title"], params["director"], params["year"], params["description"], id))
-        db.commit()
+        #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Dane filmu zostały zaktualizowane"}
         else:
@@ -137,11 +148,11 @@ def update_movie_id(id: int, params: dict[str, Any]):
 
 # Usuwa film o id = {id} z tabeli movie
 @app.delete("/movies/{id}")
-def rem_movie_id(id: int):
+def rem_movie_id(id: int, db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('DELETE FROM movie WHERE id = ?;', (id,))
-        db.commit()
+        #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Film został usunięty"}
         else:
@@ -156,9 +167,9 @@ def rem_movie_id(id: int):
 # Pobiera informacje o aktorach z tabeli actors z bazy movies-extended.db;
 # zwraca wynik w formie listy słowników
 @app.get('/actors')
-def get_actors():
+def get_actors(db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         actors = cursor.execute('SELECT * FROM actor').fetchall()
         output = []
         for act in actors:
@@ -170,9 +181,9 @@ def get_actors():
 
 # Pobiera informacje o aktorze z id = {actor_id} z tabeli actor
 @app.get('/actors/{actor_id}')
-def get_single_actor(actor_id:int):
+def get_single_actor(actor_id:int, db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         act = cursor.execute(f"SELECT * FROM actor WHERE id={actor_id}").fetchone()
         if act is None:
             return {"message": "Nie znaleziono aktora"}
@@ -182,11 +193,11 @@ def get_single_actor(actor_id:int):
 
 # Dodaje aktora do tabeli actors
 @app.post("/actors")
-def add_actor(params: dict[str, Any]):
+def add_actor(params: dict[str, Any], db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('INSERT INTO actor (name, surname) VALUES (?, ?)', (params["name"], params["surname"]))
-        db.commit()
+        #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Aktor zostal dodany!"}
         else:
@@ -196,11 +207,11 @@ def add_actor(params: dict[str, Any]):
     
 # Usuwa aktora o id = {id} z tabeli actors
 @app.delete("/actors/{id}")
-def rem_actor_id(id: int):
+def rem_actor_id(id: int, db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('DELETE FROM actor WHERE id = ?;', (id,))
-        db.commit()
+        #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Aktor został usunięty"}
         else:
@@ -210,11 +221,11 @@ def rem_actor_id(id: int):
     
 # Aktualizuje dane aktora o id = {id} z tabeli actor
 @app.put("/actors/{id}")
-def update_movie_id(id: int, params: dict[str, Any]):
+def update_movie_id(id: int, params: dict[str, Any], db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         cursor.execute('UPDATE actor SET name = ?, surname = ? WHERE id = ?;', (params["name"], params["surname"], id))
-        db.commit()
+        #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Dane aktora zostały zaktualizowane"}
         else:
@@ -229,9 +240,9 @@ def update_movie_id(id: int, params: dict[str, Any]):
 # Pobiera informacje o aktorach grających w filmie z id = {film_id} z tabeli
 # actors
 @app.get('/movies/{film_id}/actors')
-def get_cast(film_id:int):
+def get_cast(film_id:int, db = Depends(handle_connection)):
     try:
-        db, cursor = init_connection('movies-extended.db')
+        cursor = db.cursor()
         actors = cursor.execute(f"SELECT name, surname FROM actor a INNER JOIN movie_actor_through m ON a.id = m.actor_id WHERE m.movie_id = {film_id};")
         #act = cursor.execute(f"SELECT * FROM actor WHERE id={actor_id}").fetchone()
         output = []

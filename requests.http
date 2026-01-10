@@ -1,0 +1,45 @@
+
+
+POST http://127.0.0.1:8000/actors HTTP/1.1
+Content-Type: application/json
+
+{
+    "name":"Izabella",
+    "surname": "Scorupco"
+}
+
+PUT http://127.0.0.1:8000/actors/1 HTTP/1.1
+Content-Type: application/json
+
+{
+    "name":"Izabella",
+    "surname": "Scorupco"
+}
+
+
+PUT http://127.0.0.1:8000/movies/1 HTTP/1.1
+Content-Type: application/json
+
+{
+    "title": "Ogniem i mieczem",
+    "director": "Jerzy Hoffman",
+    "year": 1997,
+    "description": "historyczny"
+}
+
+POST http://127.0.0.1:8000/movies HTTP/1.1
+Content-Type: application/json
+
+{
+    "title": "Ogniem i mieczem",
+    "director": "Jerzy Hoffman",
+    "year": 1997,
+    "description": "historyczny"
+}
+
+
+DELETE http://127.0.0.1:8000/movies/8
+
+DELETE http://127.0.0.1:8000/actors/20
+
+DELETE http://127.0.0.1:8000/movies
