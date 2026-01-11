@@ -65,10 +65,10 @@ def handle_connection():
     finally:
         db.close()
 
-def init_connection(dbase: str):
-    db = sqlite3.connect(dbase)
-    cursor = db.cursor()
-    return db, cursor
+#def init_connection(dbase: str):
+#    db = sqlite3.connect(dbase)
+#    cursor = db.cursor()
+#    return db, cursor
 
 ######################################################################
 # Funkcje do obsługi tabeli movie
