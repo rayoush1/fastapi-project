@@ -122,6 +122,8 @@ def rem_movies_all(db = Depends(handle_connection)):
     try:
         cursor = db.cursor()
         cursor.execute('DELETE FROM movie;')
+        #cursor.execute('DELETE FROM movie_actor_through')
+
         #db.commit()
 
         if cursor.rowcount > 0:
@@ -152,6 +154,8 @@ def rem_movie_id(id: int, db = Depends(handle_connection)):
     try:
         cursor = db.cursor()
         cursor.execute('DELETE FROM movie WHERE id = ?;', (id,))
+        #cursor.execute('DELETE FROM movie_actor_through WHERE movie_id = ?;', (id,))
+
         #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Film został usunięty"}
@@ -211,6 +215,8 @@ def rem_actor_id(id: int, db = Depends(handle_connection)):
     try:
         cursor = db.cursor()
         cursor.execute('DELETE FROM actor WHERE id = ?;', (id,))
+        #cursor.execute('DELETE FROM movie_actor_through WHERE actor_id = ?;', (id,))
+
         #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Aktor został usunięty"}
