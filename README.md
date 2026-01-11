@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 W terminalu przejdź do folderu z repozytorium i wywołaj
 
-fastapi dev main.py
+fastapi run
 
 Strona powinna działać na http://127.0.0.1:8000/
 
@@ -40,4 +40,4 @@ http://127.0.0.1:8000/redoc
 
 ## Testy
 
-Plik requests.http zawiera przykładowe testy w REST Client dla Visual studio code.
+Plik requests.http zawiera przykładowe testy w REST Client dla Visual Studio Code.
