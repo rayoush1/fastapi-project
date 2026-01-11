@@ -108,7 +108,7 @@ def add_movie(params: dict[str, Any], db = Depends(handle_connection)):
     try:
         cursor = db.cursor()
         cursor.execute('INSERT INTO movie (title, director, year, description) VALUES (?, ?, ?, ?)', (params["title"], params["director"], params["year"], params["description"]))
-        db.commit()
+        #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Film zostal dodany!"}
         else:
@@ -201,6 +201,7 @@ def add_actor(params: dict[str, Any], db = Depends(handle_connection)):
     try:
         cursor = db.cursor()
         cursor.execute('INSERT INTO actor (name, surname) VALUES (?, ?)', (params["name"], params["surname"]))
+        
         #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Aktor zostal dodany!"}
@@ -231,6 +232,7 @@ def update_movie_id(id: int, params: dict[str, Any], db = Depends(handle_connect
     try:
         cursor = db.cursor()
         cursor.execute('UPDATE actor SET name = ?, surname = ? WHERE id = ?;', (params["name"], params["surname"], id))
+
         #db.commit()
         if cursor.rowcount > 0:
             return {"message": f"Dane aktora zostały zaktualizowane"}
